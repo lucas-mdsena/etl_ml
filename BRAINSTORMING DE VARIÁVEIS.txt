@@ -1,0 +1,41 @@
+BRAINSTORMING DE VARIÁVEIS QUE PODEM INFLUENCIAR NO CHURN DE VENDEDORES
+
+- avaliação (NPS)
+- nota avaliação
+- quant avaliações
+- quant avalições negativas
+
+
+- vendas
+- quant vendas (pedidos)
+- quant vendas (dias)
+- quant vendas (itens)
+- dias sem vender (recência)
+- ticket médio
+- intervalo médio entre vendas
+- dias desde a primeira venda {pq n existe a informação de data do cadastro do vendedor)
+- LTV
+- valor médio por produto
+- max(valor)
+- min(valor)
+- itens por pedido
+
+
+- categoria do produto
+- tamanho do portfólio (quant de itens distintos)
+
+
+- região dos clientes
+
+
+- entregas com atraso (%)
+- valor do frete (média ou mediana)
+- tempo médio de entrega
+- pedidos cancelados
+- diferença entre promessa e entrega
+
+
+- forma de pagamento dos clientes
+- quant parcelas em média (se cartão)
+- % de voucher utilizado
+- % boleto/pix
