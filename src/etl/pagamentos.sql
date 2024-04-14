@@ -18,6 +18,7 @@ WITH tb_pedidos AS (
     AND t2.seller_id IS NOT NULL
 ),
 
+
 -- A partir da query acima, obtém os pagamentos para cada pedido.
 tb_join AS (
     SELECT
@@ -29,6 +30,7 @@ tb_join AS (
     ON t1.order_id = t2.order_id
 ),
 
+
 -- Calcula a quantidade que cada vendedor tem de cada tipo de pagamento (se um vendedor tem 3 formas de pgto, gera 3 linhas para esse vendedor).
 tb_group as (
     SELECT 
@@ -39,9 +41,12 @@ tb_group as (
     FROM tb_join
     GROUP BY idVendedor, descTipoPagamento
     ORDER BY idVendedor, descTipoPagamento
-)
+),
 
--- Transforma cada tipo de pagamento em uma coluna e calcula a quantidade de vendas por vendedor (cada vendedor sendo uma linha única)
+
+-- Transforma cada tipo de pagamento em uma coluna e calcula a quantidade de vendas por vendedor (cada vendedor sendo uma linha única).
+-- Esta query retorna estatísticas de cada vendedor que fizeram pedidos entre o período determinado.
+tb_summary AS (
 SELECT 
     idVendedor
 
@@ -68,5 +73,30 @@ SELECT
 FROM tb_group
 GROUP BY 1
 ORDER BY 1
+),
 
+-- Esta query retorna as estatísticas de parcelas de cartão por vendedor
+tb_cartao AS (
+    SELECT
+        seller_id as idVendedor
+        ,AVG(payment_installments) AS avgQtdeParcelas
+        -- calcular mediana
+        ,MAX(payment_installments) AS maxQtdeParcelas
+        ,MIN(payment_installments) AS minQtdeParcelas
+    FROM
+        tb_join
+    WHERE payment_type = 'credit_card'
+    GROUP BY idVendedor
+)
 
+-- Query final com os dados formas de pagamento e parcelas de cartão de crédito por vendedor
+SELECT 
+    '2018-01-01' as dtRefence -- Coluna com o carimbo da data de referência ("Como estava o vendedor naquela data")
+    ,t1.*
+    ,t2.avgQtdeParcelas
+    ,t2.maxQtdeParcelas
+    ,t2.minQtdeParcelas
+FROM tb_summary as t1
+
+LEFT JOIN tb_cartao as t2
+ON t1.idVendedor = t2.idVendedor
