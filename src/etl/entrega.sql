@@ -1,6 +1,6 @@
 WITH tb_pedido AS(
     SELECT
-        t1.order_id AS idPedido
+        t1.order_id AS idPedido 
         ,t2.seller_id AS idVendedor
         ,t1.order_status AS descSituacao
         ,t1.order_purchase_timestamp AS dtPedido
@@ -14,8 +14,9 @@ WITH tb_pedido AS(
     LEFT JOIN tb_order_items AS t2
     ON t1.order_id = t2.order_id
 
-    WHERE order_purchase_timestamp < '2018-01-01'
-    AND order_purchase_timestamp >= DATE('2018-01-01', '-6 month')
+    WHERE t1.order_purchase_timestamp < '2018-01-01'
+    AND t1.order_purchase_timestamp >= DATE('2018-01-01', '-6 month')
+    AND t2.seller_id IS NOT NULL
 
     GROUP BY
         t1.order_id
@@ -28,7 +29,8 @@ WITH tb_pedido AS(
 )
 
 SELECT 
-    idVendedor
+    '2018-01-01' AS dtReference
+    ,idVendedor
     ,count(DISTINCT CASE WHEN descSituacao = 'canceled' THEN idPedido END) * 100.0/100.0 / count(DISTINCT idPedido) AS pctPedidoCancelado
     ,count(DISTINCT CASE WHEN DATE(COALESCE(dtEntregue,'2018-01-01')) > DATE(dtEstimativaEntrega) THEN idPedido END) * 100.0/100.0 / count(DISTINCT CASE WHEN descSituacao = 'delivered' THEN idPedido END) AS pctPedidoAtraso
     ,avg(totalFrete) AS avgFrete
@@ -42,5 +44,4 @@ SELECT
     --,avg(datediff(dtEntregue, dtPedido)) as qtdDiasPedidoEntrega (o teo calculou assim os resultados dele ficaram um pouco menores)
     ,avg(julianday(dtEstimativaEntrega) - julianday(COALESCE(dtEntregue,'2018-01-01'))) as qtdDiasEntregaPromessa
 FROM tb_pedido
-WHERE idVendedor like '062ce95%' or idVendedor like '0ea22c1%'
-GROUP BY 1 
+GROUP BY idVendedor  
