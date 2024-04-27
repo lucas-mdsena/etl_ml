@@ -13,8 +13,8 @@ WITH tb_join AS (
     LEFT JOIN tb_customers as t3
     ON t1.customer_id = t3.customer_id
 
-    WHERE t1.order_purchase_timestamp < '2018-01-01'
-    AND t1.order_purchase_timestamp >= DATE('2018-01-01', '-6 month')
+    WHERE t1.order_purchase_timestamp < '{date}'
+    AND t1.order_purchase_timestamp >= DATE('{date}', '-6 month')
     AND t2.seller_id is NOT NULL
 ),
 
@@ -56,6 +56,7 @@ tb_group AS(
 
 -- Query final com dados de em quantos estados um vendedor fez vendas e quantas vendas para cada estado
 SELECT
-    '2018-01-01' AS dtReference
+    '{date}' AS dtReference
+    ,DATE('now') as dtIngestion
     ,*
 FROM tb_group

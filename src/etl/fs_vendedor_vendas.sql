@@ -1,6 +1,3 @@
-
---  intervalo médio entre vendas
-
 WITH tb_pedido_item AS (
     SELECT 
         t2.*
@@ -10,8 +7,8 @@ WITH tb_pedido_item AS (
     LEFT JOIN tb_order_items AS t2
     ON t1.order_id = t2.order_id
 
-    WHERE t1.order_purchase_timestamp < '2018-01-01'
-    AND t1.order_purchase_timestamp >= DATE('2018-01-01', '-6 month')
+    WHERE t1.order_purchase_timestamp < '{date}' -- placeholder para o script de ingestão manipular a data de referência
+    AND t1.order_purchase_timestamp >= DATE('{date}', '-6 month')
     AND t2.seller_id IS NOT NULL
 ),
 
@@ -21,7 +18,7 @@ tb_summary AS (
         ,count(DISTINCT order_id) AS qtdPedidos
         ,count(DISTINCT DATE(dtPedido)) AS qtdDias
         ,count(product_id) AS qtdItens
-        ,CAST(round(min(julianday('2018-01-01') - julianday(dtPedido))) AS INT) AS qtdRecencia -- Retorna a quanto tempo ocorreu a última venda de cada vendedor
+        ,julianday('{date}') - max(julianday(dtPedido)) as qtdRecencia -- Retorna a quanto tempo ocorreu a última venda de cada vendedor
         ,sum(price) / count(DISTINCT order_id) AS avgTicket -- Usa-se distinct no order_id, pois a query anterior está em nível de produto                                                                                                                                                                                                     der_id) AS avgTicket -- Feito distinct no order_id, pois a query anterior está em nível de produto
         ,avg(price) AS avgValorProduto
         ,max(Price) AS maxValorProduto
@@ -56,13 +53,13 @@ tb_life AS (
     SELECT 
         t2.seller_id AS idVendedor
         ,sum(t2.price) AS LTV
-        ,CAST(round(max(julianday('2018-01-01') - julianday(t1.order_purchase_timestamp))) AS INT) AS qtdeDiasBase -- tempo desde que a pessoa fez a sua primeira venda
+        ,max(julianday('{date}') - julianday(t1.order_purchase_timestamp)) as qtdeDiasBase -- tempo desde que a pessoa fez a sua primeira venda
     FROM tb_orders AS t1
 
     LEFT JOIN tb_order_items AS t2
     ON t1.order_id = t2.order_id
 
-    WHERE t1.order_purchase_timestamp < '2018-01-01'
+    WHERE t1.order_purchase_timestamp < '{date}'
     AND t2.seller_id IS NOT NULL
 
     GROUP BY t2.seller_id
@@ -95,7 +92,8 @@ tb_intervalo AS (
 )
 
 SELECT 
-    '2018-01-01' AS dtReference
+    '{date}' AS dtReference
+    ,DATE('now') as dtIngestion
     ,t1.*
     ,t2.minVlPedido
     ,t2.maxVlPedido
