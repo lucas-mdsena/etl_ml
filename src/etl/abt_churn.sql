@@ -25,8 +25,8 @@
 --     GROUP BY 1
 -- )
 
--- DROP TABLE IF EXISTS abt_olist_churn;
--- CREATE TABLE abt_olist_churn AS
+DROP TABLE IF EXISTS abt_olist_churn;
+CREATE TABLE abt_olist_churn AS
 
 WITH tb_features AS (
     SELECT
@@ -201,4 +201,4 @@ LEFT JOIN tb_flag AS t2
 ON t1.idVendedor = t2.idVendedor
 AND t1.dtReference = t2.dtReference
 
-ORDER BY t1.idVendedor, t2.dtReference
+ORDER BY t1.idVendedor, t2.dtReference;
