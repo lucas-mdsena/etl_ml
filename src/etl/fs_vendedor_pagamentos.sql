@@ -13,8 +13,8 @@ WITH tb_pedidos AS (
     LEFt JOIN tb_order_items AS t2
     ON t1.order_id = t2.order_id
 
-    WHERE t1.order_purchase_timestamp < '2018-01-01'
-    AND t1.order_purchase_timestamp >= DATE('2018-01-01', '-6 month')
+    WHERE t1.order_purchase_timestamp < '{date}'
+    AND t1.order_purchase_timestamp >= DATE('{date}', '-6 month')
     AND t2.seller_id IS NOT NULL
 ),
 
@@ -91,7 +91,8 @@ tb_cartao AS (
 
 -- Query final com os dados formas de pagamento e parcelas de cartão de crédito por vendedor
 SELECT 
-    '2018-01-01' as dtRefence -- Coluna com o carimbo da data de referência ("Como estava o vendedor naquela data")
+    '{date}' as dtReference -- Coluna com o carimbo da data de referência ("Como estava o vendedor naquela data")
+    ,DATE('now') as dtIngestion
     ,t1.*
     ,t2.avgQtdeParcelas
     ,t2.maxQtdeParcelas

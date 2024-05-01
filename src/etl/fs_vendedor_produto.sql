@@ -12,8 +12,8 @@ WITH tb_join AS (
     LEFT JOIN tb_products as t3
     ON t2.product_id = t3.product_id
 
-    WHERE t1.order_purchase_timestamp < '2018-01-01'
-    AND t1.order_purchase_timestamp >= DATE('2018-01-01', '-6 month')
+    WHERE t1.order_purchase_timestamp < '{date}'
+    AND t1.order_purchase_timestamp >= DATE('{date}', '-6 month')
     AND t2.seller_id is NOT NULL
 ),
 
@@ -50,7 +50,8 @@ tb_summary AS (
 
 
 SELECT 
-    '2018-01-01' as dtReference
+    '{date}' as dtReference
+    ,DATE('now') as dtIngestion
     ,* 
 FROM tb_summary
 

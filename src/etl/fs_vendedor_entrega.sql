@@ -14,8 +14,8 @@ WITH tb_pedido AS(
     LEFT JOIN tb_order_items AS t2
     ON t1.order_id = t2.order_id
 
-    WHERE t1.order_purchase_timestamp < '2018-01-01'
-    AND t1.order_purchase_timestamp >= DATE('2018-01-01', '-6 month')
+    WHERE t1.order_purchase_timestamp < '{date}'
+    AND t1.order_purchase_timestamp >= DATE('{date}', '-6 month')
     AND t2.seller_id IS NOT NULL
 
     GROUP BY
@@ -29,19 +29,20 @@ WITH tb_pedido AS(
 )
 
 SELECT 
-    '2018-01-01' AS dtReference
+    '{date}' AS dtReference
+    ,DATE('now') as dtIngestion
     ,idVendedor
     ,count(DISTINCT CASE WHEN descSituacao = 'canceled' THEN idPedido END) * 100.0/100.0 / count(DISTINCT idPedido) AS pctPedidoCancelado
-    ,count(DISTINCT CASE WHEN DATE(COALESCE(dtEntregue,'2018-01-01')) > DATE(dtEstimativaEntrega) THEN idPedido END) * 100.0/100.0 / count(DISTINCT CASE WHEN descSituacao = 'delivered' THEN idPedido END) AS pctPedidoAtraso
+    ,count(DISTINCT CASE WHEN DATE(COALESCE(dtEntregue,'{date}')) > DATE(dtEstimativaEntrega) THEN idPedido END) * 100.0/100.0 / count(DISTINCT CASE WHEN descSituacao = 'delivered' THEN idPedido END) AS pctPedidoAtraso
     ,avg(totalFrete) AS avgFrete
     ,max(totalFrete) AS maxFrete
     ,min(totalFrete) AS minFrete
     -- calcular a mediana do frete
 
-    ,avg(julianday(COALESCE(dtEntregue,'2018-01-01')) - julianday(dtAprovado)) as qtdDiasAprovadoEntrega
-    ,avg(julianday(COALESCE(dtEntregue,'2018-01-01')) - julianday(dtPedido)) as qtdDiasPedidoEntrega
+    ,avg(julianday(COALESCE(dtEntregue,'{date}')) - julianday(dtAprovado)) as qtdDiasAprovadoEntrega
+    ,avg(julianday(COALESCE(dtEntregue,'{date}')) - julianday(dtPedido)) as qtdDiasPedidoEntrega
     --,avg(datediff(dtEntregue, dtAprovado)) as qtdDiasAprovadoEntrega (o teo calculou assim os resultados dele ficaram um pouco menores)
     --,avg(datediff(dtEntregue, dtPedido)) as qtdDiasPedidoEntrega (o teo calculou assim os resultados dele ficaram um pouco menores)
-    ,avg(julianday(dtEstimativaEntrega) - julianday(COALESCE(dtEntregue,'2018-01-01'))) as qtdDiasEntregaPromessa
+    ,avg(julianday(dtEstimativaEntrega) - julianday(COALESCE(dtEntregue,'{date}'))) as qtdDiasEntregaPromessa
 FROM tb_pedido
-GROUP BY idVendedor  
+GROUP BY idVendedor
