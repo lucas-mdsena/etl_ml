@@ -5,6 +5,7 @@
 -- Conforme o brainstorming, vamos considerar que houve churn quando o seller ficou 45 dias sem vender.
 
 
+
 -- Esta query retorna quais vendedores tiveram aos menos uma venda nos 45 dias seguidos após a data de referência 2018-01-01 e em qual dia vendeu.
 -- DROP TABLE IF EXISTS abt_olist_churn;
 -- CREATE TABLE abt_olist_churn AS
@@ -202,3 +203,5 @@ ON t1.idVendedor = t2.idVendedor
 AND t1.dtReference = t2.dtReference
 
 ORDER BY t1.idVendedor, t2.dtReference;
+ 
+
