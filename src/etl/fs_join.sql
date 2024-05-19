@@ -1,14 +1,7 @@
+DROP TABLE IF EXISTS fs_join;
 
--- Será feito agora a construção da variável resposta (alvo).
--- Desta vez, o filtro de datas será a partir do dia 2018-01-01. A construção das features foi filtrado o contrário, até 2017-12-31, PORTANTO NÃO HÁ DATA LEAKAGE.
--- Construímos as features preditoras com dados entre 2017-07-01 a 2017-12-31, e vamos construir a variável alvo a partir de 2018-01-01 + 45 dias para frente.
--- Conforme o brainstorming, vamos considerar que houve churn quando o seller ficou 45 dias sem vender.
-
-DROP TABLE IF EXISTS abt_olist_churn;
-CREATE TABLE abt_olist_churn AS
-
-WITH tb_features AS (
-    SELECT
+CREATE TABLE fs_join AS
+SELECT
         t1.dtReference
         ,t1.idVendedor
         ,t1.qtdPedidos
@@ -131,50 +124,7 @@ WITH tb_features AS (
     ON t1.idVendedor =  t6.idVendedor
     AND t1.dtReference = t6.dtReference
 
-    WHERE t1.qtdRecencia <=45
-    AND strftime('%d', t1.dtReference) = '01'
-),
-
--- Tabela fato
--- idVendedor e todos os dias em que ele vendeu
-tb_event AS (
-    SELECT
-        DISTINCT t1.seller_id as idVendedor
-        ,DATE(t2.order_purchase_timestamp) as dtPedido
-
-    FROM tb_order_items as t1
-
-    LEFT JOIN tb_orders as t2
-    ON t1.order_id = t2.order_id
-
-    WHERE t1.seller_id IS NOT NULL
-),
-
-tb_flag AS(
-    SELECT
-        t1.dtReference
-        ,t1.idVendedor
-        ,min(t2.dtPedido) as dtProxPedido
-
-    FROM tb_features AS t1
-
-    LEFT JOIN tb_event AS t2
-    ON t1.idVendedor = t2.idVendedor
-    AND t1.dtReference <= t2.dtPedido
-    AND (julianday(t2.dtPedido) - julianday(t1.dtReference)) <= 45 - t1.qtdRecencia
-
-    GROUP BY 1, 2
-)
-
-SELECT
-    t1.*
-    ,t2.dtProxPedido
-    ,CASE WHEN t2.dtProxPedido IS NULL THEN 1 ELSE 0 END AS flChurn
-
-FROM tb_features AS t1
-
-LEFT JOIN tb_flag AS t2
-ON t1.idVendedor = t2.idVendedor
-AND t1.dtReference = t2.dtReference
-
-ORDER BY t1.idVendedor, t2.dtReference;
+    WHERE t1.dtReference = (SELECT 
+                                max(dtReference) 
+                            FROM fs_vendedor_vendas)
+;
