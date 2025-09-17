@@ -9,8 +9,6 @@ Realizado um brainstorming de possíveis variáveis e construída uma ABT em SQL
 
 Desenvolvido script Python para ingestão dos dados e criação das safras.
 
-Atualmente estou na etapa de treino do modelo de classificação.
-
 
 
 
